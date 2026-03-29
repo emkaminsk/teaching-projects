@@ -1,0 +1,2 @@
+This repo hosts various python streamlit apps created for purpose of teaching kids mathematics, history, biology, various selected concepts. 
+Every app should work interactively, illustrating concepts, making it possible to play with settings and observing results.
