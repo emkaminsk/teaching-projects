@@ -11,8 +11,8 @@ st.set_page_config(page_title="Figury 2D", page_icon="📐", layout="wide")
 
 # Compact layout — no scrolling
 st.markdown("""<style>
-    .block-container {padding-top: 1rem; padding-bottom: 0rem;}
-    h1 {font-size: 1.6rem !important; margin-bottom: 0.3rem !important;}
+    .block-container {padding-top: 1.5rem !important; padding-bottom: 0rem;}
+    h1 {font-size: 1.4rem !important; margin-top: 0.5rem !important; margin-bottom: 0.1rem !important; white-space: normal !important; overflow: visible !important; display: block !important;}
     h3 {font-size: 1.1rem !important; margin-bottom: 0.2rem !important;}
     .stMetric {padding: 0.2rem 0 !important;}
     [data-testid="stMetricValue"] {font-size: 1.3rem !important;}
