@@ -10,7 +10,7 @@ st.set_page_config(page_title="Bryły 3D", page_icon="🧊", layout="wide")
 
 st.markdown("""<style>
     .block-container {padding-top: 0.5rem; padding-bottom: 0rem;}
-    h1 {font-size: 1.4rem !important; margin-bottom: 0.1rem !important;}
+    h1 {font-size: 1.4rem !important; margin-bottom: 0.1rem !important; white-space: normal !important; overflow: visible !important;}
     h3 {font-size: 1.0rem !important; margin-bottom: 0.1rem !important;}
     .stMetric {padding: 0.1rem 0 !important;}
     [data-testid="stMetricValue"] {font-size: 1.2rem !important;}

@@ -2,5 +2,5 @@ Various teaching projects.
 See CLAUDE.md for details.
 
 URLs:
-- [https://polafigur.streamlit.app/](figury 2D)
-- [https://](https://bryly-powtorka.streamlit.app/)(Bryły - powtórka)
+- [figury 2D](https://polafigur.streamlit.app/)
+- [Bryły - powtórka](https://bryly-powtorka.streamlit.app/)
