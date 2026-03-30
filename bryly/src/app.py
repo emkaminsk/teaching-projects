@@ -9,11 +9,15 @@ import streamlit as st
 st.set_page_config(page_title="Bryły 3D", page_icon="🧊", layout="wide")
 
 st.markdown("""<style>
-    .block-container {padding-top: 1rem; padding-bottom: 0rem;}
-    h1 {font-size: 1.6rem !important; margin-bottom: 0.3rem !important;}
-    h3 {font-size: 1.1rem !important; margin-bottom: 0.2rem !important;}
-    .stMetric {padding: 0.2rem 0 !important;}
-    [data-testid="stMetricValue"] {font-size: 1.3rem !important;}
+    .block-container {padding-top: 0.5rem; padding-bottom: 0rem;}
+    h1 {font-size: 1.4rem !important; margin-bottom: 0.1rem !important;}
+    h3 {font-size: 1.0rem !important; margin-bottom: 0.1rem !important;}
+    .stMetric {padding: 0.1rem 0 !important;}
+    [data-testid="stMetricValue"] {font-size: 1.2rem !important;}
+    [data-testid="stMetricLabel"] {font-size: 0.8rem !important;}
+    .stSlider {margin-bottom: -0.5rem !important;}
+    [data-testid="stExpander"] {margin-bottom: 0 !important;}
+    .element-container {margin-bottom: 0.2rem !important;}
 </style>""", unsafe_allow_html=True)
 
 plt.rcParams.update({
@@ -37,21 +41,19 @@ def _set_axes_equal(ax):
         setter([ctr - max_range, ctr + max_range])
 
 
-def _new_3d_fig():
-    fig = plt.figure(figsize=(7, 5))
-    ax = fig.add_subplot(111, projection="3d")
-    ax.xaxis.pane.fill = False
-    ax.yaxis.pane.fill = False
-    ax.zaxis.pane.fill = False
-    ax.set_facecolor("#fafafa")
-    return fig, ax
-
-
-def _new_cs_fig():
-    fig, ax = plt.subplots(figsize=(5, 2.5))
-    ax.set_aspect("equal")
-    ax.grid(True, alpha=0.3, color="gray")
-    return fig, ax
+def _new_combined_fig():
+    """One figure: 3D subplot (left, wider) + 2D cross-section (right)."""
+    fig = plt.figure(figsize=(10, 4))
+    gs = fig.add_gridspec(1, 2, width_ratios=[3, 2], wspace=0.3)
+    ax3d = fig.add_subplot(gs[0], projection="3d")
+    ax3d.xaxis.pane.fill = False
+    ax3d.yaxis.pane.fill = False
+    ax3d.zaxis.pane.fill = False
+    ax3d.set_facecolor("#fafafa")
+    ax_cs = fig.add_subplot(gs[1])
+    ax_cs.set_aspect("equal")
+    ax_cs.grid(True, alpha=0.3, color="gray")
+    return fig, ax3d, ax_cs
 
 
 def _cylinder_mesh(r, h, z0=0, n=40):
@@ -88,7 +90,7 @@ def draw_sphere(vals):
     cs_h = vals["cs_h"]
     ghost = vals.get("ghost", False)
 
-    fig, ax = _new_3d_fig()
+    fig, ax, ax_cs = _new_combined_fig()
 
     # Sphere surface
     u = np.linspace(0, 2 * np.pi, 30)
@@ -113,7 +115,6 @@ def draw_sphere(vals):
     if ghost:
         Xc, Yc, Zc = _cylinder_mesh(r, 2 * r, z0=-r)
         ax.plot_wireframe(Xc, Yc, Zc, alpha=0.12, color="gray", linestyle="--")
-        # Caps
         disk_theta = np.linspace(0, 2 * np.pi, 30)
         disk_r = np.linspace(0, r, 2)
         DT, DR = np.meshgrid(disk_theta, disk_r)
@@ -121,11 +122,10 @@ def draw_sphere(vals):
         for zz in [-r, r]:
             ax.plot_wireframe(DX, DY, np.full_like(DX, zz), alpha=0.08, color="gray")
 
-    ax.set_title("Kula", fontsize=14)
+    ax.set_title("Kula", fontsize=13)
     _set_axes_equal(ax)
 
     # Cross-section 2D
-    fig_cs, ax_cs = _new_cs_fig()
     if cs_r > 0.01:
         circle = plt.Circle((0, 0), cs_r, color="#6CB4EE", alpha=0.4)
         ax_cs.add_patch(circle)
@@ -138,9 +138,9 @@ def draw_sphere(vals):
         lim = 2
     ax_cs.set_xlim(-lim, lim)
     ax_cs.set_ylim(-lim, lim)
-    ax_cs.set_title(f"Przekrój na wysokości h={cs_h:.1f}", fontsize=11)
+    ax_cs.set_title(f"Przekrój h={cs_h:.1f}", fontsize=11)
 
-    return fig, fig_cs
+    return fig
 
 
 # ---------------------------------------------------------------------------
@@ -153,7 +153,7 @@ def draw_cone(vals):
     cs_t = vals["cs_h"]
     ghost = vals.get("ghost", False)
 
-    fig, ax = _new_3d_fig()
+    fig, ax, ax_cs = _new_combined_fig()
 
     # Cone surface
     z = np.linspace(0, h, 20)
@@ -188,11 +188,10 @@ def draw_cone(vals):
         Xc, Yc, Zc = _cylinder_mesh(r, h)
         ax.plot_wireframe(Xc, Yc, Zc, alpha=0.12, color="gray", linestyle="--")
 
-    ax.set_title("Stożek", fontsize=14)
+    ax.set_title("Stożek", fontsize=13)
     _set_axes_equal(ax)
 
     # Cross-section 2D
-    fig_cs, ax_cs = _new_cs_fig()
     if cs_r > 0.01:
         circle = plt.Circle((0, 0), cs_r, color="#C8A2C8", alpha=0.4)
         ax_cs.add_patch(circle)
@@ -204,9 +203,9 @@ def draw_cone(vals):
         lim = 2
     ax_cs.set_xlim(-lim, lim)
     ax_cs.set_ylim(-lim, lim)
-    ax_cs.set_title(f"Przekrój na wysokości t={cs_t:.1f}", fontsize=11)
+    ax_cs.set_title(f"Przekrój t={cs_t:.1f}", fontsize=11)
 
-    return fig, fig_cs
+    return fig
 
 
 # ---------------------------------------------------------------------------
@@ -228,7 +227,7 @@ def draw_prism(vals):
     a, b, c = vals["a"], vals["b"], vals["c"]
     cs_t = vals["cs_h"]
 
-    fig, ax = _new_3d_fig()
+    fig, ax, ax_cs = _new_combined_fig()
 
     faces = _prism_faces(a, b, c)
     ax.add_collection3d(Poly3DCollection(
@@ -248,19 +247,18 @@ def draw_prism(vals):
     ax.plot([0, a, a, 0, 0], [0, 0, b, b, 0],
             [cs_t]*5, "m-", lw=2)
 
-    ax.set_title("Prostopadłościan", fontsize=14)
+    ax.set_title("Prostopadłościan", fontsize=13)
     _set_axes_equal(ax)
 
     # Cross-section 2D
-    fig_cs, ax_cs = _new_cs_fig()
     rect = plt.Rectangle((0, 0), a, b, color="#FFB347", alpha=0.4)
     ax_cs.add_patch(rect)
     ax_cs.set_xlim(-1, a + 1)
     ax_cs.set_ylim(-1, b + 1)
     ax_cs.text(a / 2, b / 2, f"{a}×{b}", ha="center", va="center", fontsize=12)
-    ax_cs.set_title(f"Przekrój na wysokości t={cs_t:.1f}", fontsize=11)
+    ax_cs.set_title(f"Przekrój t={cs_t:.1f}", fontsize=11)
 
-    return fig, fig_cs
+    return fig
 
 
 # ---------------------------------------------------------------------------
@@ -271,7 +269,7 @@ def draw_cube(vals):
     a = vals["a"]
     cs_t = vals["cs_h"]
 
-    fig, ax = _new_3d_fig()
+    fig, ax, ax_cs = _new_combined_fig()
 
     faces = _prism_faces(a, a, a)
     ax.add_collection3d(Poly3DCollection(
@@ -282,9 +280,9 @@ def draw_cube(vals):
         ia = int(a)
         for i in range(ia + 1):
             for j in range(ia + 1):
-                ax.plot([i, i], [0, a], [j, j], color="gray", alpha=0.15, lw=0.5)  # y lines
-                ax.plot([0, a], [i, i], [j, j], color="gray", alpha=0.15, lw=0.5)  # x lines
-                ax.plot([i, i], [j, j], [0, a], color="gray", alpha=0.15, lw=0.5)  # z lines
+                ax.plot([i, i], [0, a], [j, j], color="gray", alpha=0.15, lw=0.5)
+                ax.plot([0, a], [i, i], [j, j], color="gray", alpha=0.15, lw=0.5)
+                ax.plot([i, i], [j, j], [0, a], color="gray", alpha=0.15, lw=0.5)
 
     # Space diagonal
     d = a * math.sqrt(3)
@@ -296,19 +294,18 @@ def draw_cube(vals):
     # Cross-section plane
     ax.plot([0, a, a, 0, 0], [0, 0, a, a, 0], [cs_t]*5, "m-", lw=2)
 
-    ax.set_title("Sześcian", fontsize=14)
+    ax.set_title("Sześcian", fontsize=13)
     _set_axes_equal(ax)
 
     # Cross-section 2D
-    fig_cs, ax_cs = _new_cs_fig()
     rect = plt.Rectangle((0, 0), a, a, color="#FDFD96", alpha=0.5, edgecolor="k")
     ax_cs.add_patch(rect)
     ax_cs.set_xlim(-1, a + 1)
     ax_cs.set_ylim(-1, a + 1)
     ax_cs.text(a / 2, a / 2, f"{a}×{a}", ha="center", va="center", fontsize=12)
-    ax_cs.set_title(f"Przekrój na wysokości t={cs_t:.1f}", fontsize=11)
+    ax_cs.set_title(f"Przekrój t={cs_t:.1f}", fontsize=11)
 
-    return fig, fig_cs
+    return fig
 
 
 # ---------------------------------------------------------------------------
@@ -320,7 +317,7 @@ def draw_cylinder(vals):
     h = vals["h"]
     cs_t = vals["cs_h"]
 
-    fig, ax = _new_3d_fig()
+    fig, ax, ax_cs = _new_combined_fig()
 
     # Lateral surface
     X, Y, Z = _cylinder_mesh(r, h)
@@ -343,34 +340,21 @@ def draw_cylinder(vals):
     # Cross-section ring
     ax.plot(r * np.cos(theta), r * np.sin(theta), cs_t, "m-", lw=2)
 
-    ax.set_title("Walec", fontsize=14)
+    ax.set_title("Walec", fontsize=13)
     _set_axes_equal(ax)
 
-    # Cross-section 2D: circle + unrolled rectangle
-    fig_cs, axes_cs = plt.subplots(1, 2, figsize=(8, 2.5))
-
-    ax1 = axes_cs[0]
-    ax1.set_aspect("equal")
-    ax1.grid(True, alpha=0.3)
+    # Cross-section 2D: circle
     circle = plt.Circle((0, 0), r, color="#FFD580", alpha=0.4)
-    ax1.add_patch(circle)
-    ax1.set_xlim(-r * 1.3, r * 1.3)
-    ax1.set_ylim(-r * 1.3, r * 1.3)
-    ax1.set_title("Przekrój (koło)", fontsize=10)
-    ax1.text(0, 0, f"r={r}", ha="center", va="center", fontsize=10)
-
-    ax2 = axes_cs[1]
-    ax2.grid(True, alpha=0.3)
+    ax_cs.add_patch(circle)
+    ax_cs.set_xlim(-r * 1.3, r * 1.3)
+    ax_cs.set_ylim(-r * 1.3, r * 1.3)
+    ax_cs.set_title(f"Przekrój t={cs_t:.1f}", fontsize=11)
+    ax_cs.text(0, 0, f"r={r}", ha="center", va="center", fontsize=10)
     rect_w = 2 * math.pi * r
-    rect = plt.Rectangle((0, 0), rect_w, h, color="#FFD580", alpha=0.4, edgecolor="k")
-    ax2.add_patch(rect)
-    ax2.set_xlim(-1, rect_w + 1)
-    ax2.set_ylim(-1, h + 1)
-    ax2.set_title("Rozwinięcie boczne", fontsize=10)
-    ax2.text(rect_w / 2, h / 2, f"2πr={rect_w:.1f} × h={h}", ha="center", va="center", fontsize=9)
+    ax_cs.text(0, -r * 0.85, f"Rozwinięcie: {rect_w:.1f}×{h}", ha="center",
+               fontsize=8, color="gray")
 
-    fig_cs.tight_layout()
-    return fig, fig_cs
+    return fig
 
 
 # ---------------------------------------------------------------------------
@@ -383,7 +367,7 @@ def draw_pyramid(vals):
     cs_t = vals["cs_h"]
     ghost = vals.get("ghost", False)
 
-    fig, ax = _new_3d_fig()
+    fig, ax, ax_cs = _new_combined_fig()
 
     apex = [a / 2, a / 2, h]
     base = np.array([[0,0,0],[a,0,0],[a,a,0],[0,a,0]])
@@ -423,11 +407,10 @@ def draw_pyramid(vals):
     if ghost:
         _prism_edges(ax, a, a, h)
 
-    ax.set_title("Ostrosłup", fontsize=14)
+    ax.set_title("Ostrosłup", fontsize=13)
     _set_axes_equal(ax)
 
     # Cross-section 2D
-    fig_cs, ax_cs = _new_cs_fig()
     if cs_edge > 0.01:
         rect = plt.Rectangle((-cs_edge/2, -cs_edge/2), cs_edge, cs_edge,
                               color="#FF6961", alpha=0.4, edgecolor="k")
@@ -440,9 +423,9 @@ def draw_pyramid(vals):
         lim = 2
     ax_cs.set_xlim(-lim, lim)
     ax_cs.set_ylim(-lim, lim)
-    ax_cs.set_title(f"Przekrój na wysokości t={cs_t:.1f}", fontsize=11)
+    ax_cs.set_title(f"Przekrój t={cs_t:.1f}", fontsize=11)
 
-    return fig, fig_cs
+    return fig
 
 
 # ---------------------------------------------------------------------------
@@ -673,11 +656,9 @@ def main():
         st.latex(cfg["surface_formula"](vals))
 
     with col2:
-        fig_3d, fig_cs = cfg["draw"](vals)
-        st.pyplot(fig_3d, use_container_width=True)
-        plt.close(fig_3d)
-        st.pyplot(fig_cs, use_container_width=True)
-        plt.close(fig_cs)
+        fig = cfg["draw"](vals)
+        st.pyplot(fig, use_container_width=True)
+        plt.close(fig)
         st.info(cfg["intuition"])
 
 
