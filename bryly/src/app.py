@@ -601,10 +601,14 @@ def main():
 
     with st.sidebar:
         st.header("🧊 Bryły 3D")
+        # Initialize session state if needed
+        if "solid" not in st.session_state:
+            st.session_state.solid = solid_names[0]
+        
         selected = st.selectbox(
             "Wybierz bryłę",
             solid_names,
-            index=solid_names.index(st.session_state.get("solid", solid_names[0])),
+            key="solid_selector",
         )
         st.session_state.solid = selected
 

@@ -465,10 +465,14 @@ def main():
 
     with st.sidebar:
         st.header("📐 Figury 2D")
+        # Initialize session state if needed
+        if "shape" not in st.session_state:
+            st.session_state.shape = shape_names[0]
+        
         selected = st.selectbox(
             "Wybierz figurę",
             shape_names,
-            index=shape_names.index(st.session_state.get("shape", shape_names[0])),
+            key="shape_selector",
         )
         st.session_state.shape = selected
 
