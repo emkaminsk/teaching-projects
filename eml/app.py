@@ -631,7 +631,7 @@ function can be built from `eml` alone.
         "Just as **every** Boolean circuit reduces to NAND gates, **every** "
         "elementary function (exp, ln, sin, cos, sqrt, arithmetic, ...) "
         "reduces to nested EML applications. EML is the continuous-math NAND.",
-        icon="=",
+        icon="\u2194",
     )
 
 
@@ -821,31 +821,22 @@ elementary function can be built from EML alone.
 ([arXiv:2603.21852](https://arxiv.org/abs/2603.21852))*
 """)
 
-mode = st.radio(
-    "Choose mode",
-    ["Illustration", "Regression"],
-    horizontal=True,
-    help="**Illustration**: explore how functions decompose into EML. "
-         "**Regression**: discover formulas from data using EML trees.",
-)
-
-st.markdown("---")
+tab_illustration, tab_regression = st.tabs(["Illustration", "Regression"])
 
 # ═════════════════════════════════════════════
 # ILLUSTRATION MODE
 # ═════════════════════════════════════════════
 
-if mode == "Illustration":
+with tab_illustration:
     render_nand_analogy()
     render_explorer()
     render_build_your_own()
-
 
 # ═════════════════════════════════════════════
 # REGRESSION MODE (original functionality)
 # ═════════════════════════════════════════════
 
-else:
+with tab_regression:
     # ── Sidebar ──────────────────────────────
     with st.sidebar:
         st.header("Configuration")
